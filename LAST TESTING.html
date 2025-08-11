@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/Img/tnb read/Company_icon.png">
+    <title>Solar Performance Calculator</title>
+    <link rel="stylesheet" href="css/layout.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply box-sizing: border-box globally for easier layout management */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Specific styles for the Energy Clipping section */
+        #EnergyClippingView {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Changed from flex-start to center to center its children horizontally */
+            gap: 2.5rem;
+            /* Equivalent to gap-10 (10 * 0.25rem = 2.5rem) */
+            margin: 2.5rem auto;
+            /* Equivalent to my-10 mx-auto */
+            max-width: 80rem;
+            /* Equivalent to max-w-5xl (80rem = 1280px, 5xl is 1024px, adjusting for better fit) */
+            padding: 2rem;
+            /* Equivalent to p-8 */
+            background-color: #FFF8E7;
+            /* Reverted to previous F4C769 */
+            border-radius: 0.5rem;
+            /* Equivalent to rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* Equivalent to shadow-md */
+            width: calc(100% - 2rem);
+            /* Ensure it doesn't exceed screen width minus body padding */
+        }
+
+        /* Ensure h1 and p text inside EnergyClippingView are centered */
+        #EnergyClippingView h1,
+        #EnergyClippingView p {
+            text-align: center;
+            width: 100%;
+            /* Make them take full width to center content */
+            color: #142850;
+            /* Ensure text color is consistent */
+        }
+
+        #EnergyClippingView p {
+            font-size: 16px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+
+        /* Styles for the inner content wrappers within EnergyClippingView and checkYield */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            /* Stacks vertically by default on small screens */
+            align-items: center;
+            /* Centers items vertically when stacked */
+            gap: 1.25rem;
+            /* Equivalent to gap-5 */
+            padding: 2rem;
+            /* Equivalent to p-8 */
+            background-color: #F4C769;
+            border-radius: 0.5rem;
+            /* Equivalent to rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* Equivalent to shadow-md */
+            width: 100%;
+            /* Equivalent to w-full */
+        }
+
+        /* Styles for the image section within content-wrapper */
+        .image-section {
+            width: 100%;
+            /* Full width on small screens */
+        }
+
+        .image-section img {
+            width: 100%;
+            /* Full width of its container */
+            height: auto;
+            display: block;
+            border-radius: 0.375rem;
+            object-fit: cover;
+        }
+
+        /* Styles for the text section within content-wrapper */
+        .text-section {
+            width: 100%;
+            /* Full width on small screens */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Centers text vertically */
+            text-align: center;
+            /* Centers text horizontally */
+            padding-top: 1rem;
+            /* Equivalent to pt-4 */
+        }
+
+        .text-section p {
+            font-size: 1.125rem;
+            /* Equivalent to text-lg */
+            line-height: 1.625;
+            /* Equivalent to leading-relaxed */
+            color: #142850;
+            /* Equivalent to text-[#142850] */
+        }
+
+        /* Media query for medium screens and larger (md breakpoint in Tailwind is typically 768px) */
+        @media (min-width: 768px) {
+            .content-wrapper {
+                flex-direction: row;
+                /* Arranges horizontally on medium screens and up */
+                align-items: center;
+                /* Centers items vertically when side-by-side */
+            }
+
+            .image-section {
+                width: 100%;
+
+                /* Occupies 60% width on medium screens and up by default */
+            }
+
+            .text-section {
+                width: 40%;
+                /* Occupies 40% width on medium screens and up by default */
+                padding-top: 0;
+                /* Remove top padding when side-by-side */
+            }
+
+            /* Specific rules for #checkYield to make images smaller */
+            #checkYield .image-section {
+                width: 40%;
+                /* Make image smaller (40% width) */
+            }
+
+            #checkYield .text-section {
+                width: 60%;
+                /* Make text larger (60% width) to compensate */
+            }
+        }
+
+        /* Styles for #checkYield to match EnergyClippingView's outer container */
+        #checkYield {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+            /* Matches gap-10 */
+            margin: 2.5rem auto;
+            /* Matches my-10 mx-auto */
+            max-width: 60rem;
+            /* As per your specific request for checkYield */
+            padding: 2rem;
+            /* Matches p-8 */
+            background-color: #FFF8E7;
+            /* Matches EnergyClippingView's background */
+            border-radius: 0.5rem;
+            /* Matches rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* Matches shadow-md */
+            width: calc(100% - 2rem);
+            /* Ensures it doesn't exceed screen width minus body padding */
+            scroll-margin-top: 160px;
+            /* Keep existing scroll-margin-top from container_tech */
+        }
+
+        /* Ensure h2 text inside #checkYield is centered */
+        #checkYield h2 {
+            text-align: center;
+            width: 100%;
+            /* Make it take full width to center content */
+            color: #142850;
+            /* Ensure text color is consistent */
+        }
+
+        /* General container_tech styling (from your layout.css) */
+        .container_tech {
+            max-width: fit-content;
+            /* This might conflict, but the specific #EnergyClippingView and #checkYield styles override it */
+            margin: 0 auto;
+            background-color: #FFF8E7;
+            padding: 25px;
+            scroll-margin-top: 160px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ensure .flex-section also uses consistent image/text sizing */
+        .flex-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem auto;
+            max-width: 80rem;
+            padding: 1.5rem;
+            background-color: #F4C769;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: calc(100% - 2rem);
+        }
+
+        .flex-section .image-section {
+            flex: 1;
+            max-width: 50%;
+            /* Default image size for flex-section */
+        }
+
+        .flex-section .text-section {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 30px;
+        }
+
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-container {
+            background-color: #FFF8E7;
+            border: 2px solid #F89B1C;
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 600px;
+            /* Increased max-width for more space */
+            width: 90%;
+            /* Responsive width */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transform: scale(0.9);
+            /* Slightly scale down when hidden */
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            /* Set max height to 90% of viewport height */
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+        }
+
+        .popup-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .popup-overlay.active .popup-container {
+            transform: scale(1);
+            /* Scale up when active */
+        }
+
+        .popup-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #142850;
+        }
+
+        /* Styles for the input section inside the popup */
+        #monthlyYieldCalculator label {
+            color: #142850;
+            font-weight: bold;
+        }
+
+        #monthlyYieldCalculator input[type="number"],
+        #monthlyYieldCalculator select {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #FF9100;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #monthlyYieldCalculator button {
+            background-color: #C58E58;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #monthlyYieldCalculator button:hover {
+            background-color: #7D4A28;
+        }
+
+        #monthlyYieldCalculator .error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        #monthlyYieldCalculator .output-section {
+            margin-top: 20px;
+            background: #F4C769;
+            border-radius: 4px;
+            padding: 15px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top header menu -->
+    <header class="header">
+        <button id="openSidebarBtn" class="hamburger-btn">☰</button>
+
+        <a href="#home" class="logo-and-title">
+            <img src="Img/tnb read/Solana Tec final logos-13.png" alt="Solana Tec Logo" class="logo"
+                onerror="this.onerror=null; this.src='https://placehold.co/40x40/FF7505/142850?text=L';">
+        </a>
+    </header>
+
+    <aside id="mySidebar" class="sidebar">
+        <button id="closeSidebarBtn" class="sidebar-close-btn">✕</button>
+
+        <a href="#home" class="logo-and-title">
+            <img src="Img/tnb read/Solana Tec final logos-22.png" alt="Solana Tec Logo" class="logo"
+                onerror="this.onerror=null; this.src='https://placehold.co/128x128/FF7505/142850?text=Logo';">
+        </a>
+
+        <nav>
+            <a href="#readSystemSize" onclick="w3_close()">How to know Solar System Size?</a>
+            <a href="#monthlyYieldCalculator" onclick="w3_close()">Solar Performance Calculator</a>
+            <a href="#checkYield" onclick="w3_close()">Check Solar Yield</a>
+            <a href="#checkFLH" onclick="w3_close()">Full Load Hour</a>
+            <a href="#tnbBillRead" onclick="w3_close()">Performance Dashboard Overview</a>
+            <a href="#tnbBillRead" onclick="w3_close()">How to read My TNB Bill?</a>
+            <a href="#nemRead" onclick="w3_close()">NEM meter</a>
+            <a href="#TriggerAlarm" onclick="w3_close()">Common Failure</a>
+            <a href="#EnergyClippingview" onclick="w3_close()">Energy Clipping</a>
+        </nav>
+    </aside>
+
+    <div id="myOverlay" class="overlay" onclick="w3_close()"></div>
+
+    <hr class="section-divider">
+    <!-- Main content area -->
+    <div id="readSystemSize" class="container_tech ">
+        <h1>How to Know Your Solar System Size?</h1>
+
+
+
+        <div class="flex-section">
+            <div class="content-wrapper">
+                <div class="image-section">
+                    <img src="Img/tnb read/cal1.png" alt="Monthly Yield from SolisCloud">
+                </div>
+                <div class="text-section">
+                    <h1>Steps to Understand Your Solar System Size:</h1>
+                    <h3>Steps 1: Understand your solar system capacity</h3><br>
+                    <p>
+                        When enter to your SolisCloud app, you can see your overview solar system.<br>
+                        Check out and remember this part is show your solar <strong>system capacity.</strong><br>
+                        For this example, the solar system capacity is 16.65kWp.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="image-section">
+                    <img src="Img/tnb read/cal2.png" alt="Monthly Yield from SolisCloud">
+                </div>
+                <div class="text-section">
+
+                    <h3>Steps 2: Scroll down and click on the year</h3><br>
+                    <p>
+                        When you scroll down your screen, you can see that is a Operating data<br>
+                        and below it have 4 option.Find the year and click on it.<br>
+                        You can refer to this picture.
+                    </p>
+
+
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="image-section">
+                    <img src="Img/tnb read/cal3.png" alt="Monthly Yield from SolisCloud">
+                </div>
+                <div class="text-section">
+
+                    <h3>Steps 3: Click on the month that you want to know</h3><br>
+                    <p>
+                        After you click on the year, it will show like this.<br>
+                        And the next step that you want to do is click on the month that you interest.<br>
+                        Then it will show the solar generation for that months.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="image-section">
+                    <img src="Img/tnb read/cal4.png" alt="Monthly Yield from SolisCloud">
+                </div>
+                <div class="text-section">
+
+                    <h3>Steps 4: Focus on the arrow part</h3><br>
+                    <p>
+                        As you can see, that is a blue color arrow pointer to the generation.<br>
+                        It is indicate that your <strong>actual monthly yield </strong> on particulal months.<br>
+                        For this example, the monthly actual yield is 1957.4 kWh.<br><br>
+                    </p>
+
+                    <h3>Steps 5: Click on calculate now button</h3><br>
+                    <p>
+                        Calculated your solar performance by click on the
+                        calculate now button and insert your step 1 and step 4 information.
+                    </p>
+
+                    <!-- Changed onclick to openPopup() to trigger the new popup -->
+                    <button type="submit" class="btnCalculate" onclick="openMonthlyYieldCalculatorPopup()">Calculate
+                        Now</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <hr class="section-divider">
+
+    <!-- Popup structure for Monthly Yield Calculator -->
+    <div id="monthlyYieldCalculatorPopup" class="popup-overlay">
+        <div class="popup-container">
+            <button class="popup-close-btn" onclick="closeMonthlyYieldCalculatorPopup()">✕</button>
+            <div id="monthlyYieldCalculator" class="input-section">
+                <h2>Solar Performance</h2>
+
+                <label for="solarSizeInput">Solar System Size (kW):</label>
+                <input type="number" id="solarSizeInput" placeholder="e.g., 6.985" step="0.01">
+
+                <label for="actualYieldInput">Actual Monthly Yield:</label>
+                <input type="number" id="actualYieldInput" placeholder="e.g., 620" step="0.01">
+
+                <label for="unitSelect">Select Unit:</label>
+                <select id="unitSelect">
+                    <option value="kWh">kWh</option>
+                    <option value="MWh">MWh</option>
+                </select>
+
+                <label for="areaSelect">Choose Area:</label>
+                <select id="areaSelect">
+                    <option value="0">JB</option>
+                    <option value="1">Austin/Tebrau/Setia Tropika</option>
+                    <option value="2">Kluang/Batu Pahat</option>
+                    <option value="3">Muar/Malacca</option>
+                    <option value="4">KL/Selangor</option>
+                </select>
+
+                <button onclick="calculateMonthlyYield()">Calculate Monthly Yield</button>
+
+                <div id="monthlyYieldError" class="error"></div>
+                <div id="monthlyYieldOutput"></div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Popup structure -->
+
+    <div id="checkYield" class="container_tech">
+
+        <h2>How to check the earned Yield in SolisCloud?</h2>
+        <!-- Changed structure to use content-wrapper, image-section, text-section -->
+        <div class="content-wrapper">
+            <div class="image-section">
+                <img src="Img/tnb read/app-31.png" alt="Monthly Yield from SolisCloud1"
+                    onerror="this.onerror=null;this.src='https://placehold.co/600x400/F4C769/FFFFFF?text=Image+Not+Found';">
+            </div>
+            <div class="text-section">
+                <p>
+                    Under "Month" page, you can read the total yield for each of the day (1<sup>st</sup> to
+                    31<sup>st</sup>)
+                </p>
+            </div>
+        </div>
+        <div class="content-wrapper">
+            <div class="image-section">
+                <img src="Img/tnb read/app-32.png" alt="Monthly Yield from SolisCloud2"
+                    onerror="this.onerror=null;this.src='https://placehold.co/600x400/F4C769/FFFFFF?text=Image+Not+Found';">
+            </div>
+            <div class="text-section">
+                <p>Under "Year" page, you can read the total yield for each of the month (Jan to Dec)</p>
+            </div>
+        </div>
+        <div class="content-wrapper">
+            <div class="image-section">
+                <img src="Img/tnb read/app-33.png" alt="Monthly Yield from SolisCloud3"
+                    onerror="this.onerror=null;this.src='https://placehold.co/600x400/F4C769/FFFFFF?text=Image+Not+Found';">
+            </div>
+            <div class="text-section">
+                <p>Under "Total" page, you can read the total yield for each of the year.</p>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+
+    <div id="checkFLH" class="container_tech">
+
+        <h2>How to check the system performance and compare with our calculated generation?</h2>
+        <div class="show-section">
+
+            <div class="image-section">
+                <img src="Img/tnb read/app-5.png" alt="Monthly Yield from SolisCloud">
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="section-divider">
+
+    <div id="checkFLH" class="container_tech">
+        <h2>Why the dashboard does not show full?</h2>
+        <div class="flex-section">
+            <div class='content-wrapper'>
+                <div class="image-section">
+                    <img src="Img/tnb read/performance.png" alt="SolisCloud Performance">
+                </div>
+                <div class="text-section">
+                    <h1>Performance Dashboard</h1>
+                    <ul>
+                        <li>Dashboard may not show full performance due to DC to AC conversion losses.</li><br>
+                        <li>Inverters typically convert only up to <strong>80%</strong> of the solar energy produced.
+                        </li>
+                        <br>
+                        <li>Performance data is updated in real-time every <strong>five minutes</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+
+    <div id="tnbBillRead" class="container_tech">
+        <h1>How to Read Your TNB Bill?</h1>
+
+        <div id="tnbBill1" class="flex-section">
+            <div class="image-caption-col">
+                <img src="Img/tnb read/TNB table.png" alt="TNB Bill Overview 1">
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div id="nemRead" class="container_tech">
+        <h1>How to Read NEM meter?</h1>
+
+        <div id="nemview" class="flex-section">
+            <div class="image-caption-col">
+                <img src="Img/tnb read/NEMmeterRead.png" alt="NEM meter view">
+            </div>
+            <div class="text-section">
+                <h1>NEM Meter</h1>
+                <ol>
+                    <li>Code 51 is Export Energy</li><br>
+                    <li>Code 01 is Import Value</li><br>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div id="TriggerAlarm" class="container_tech">
+        <h1>What is the common failure that will Trigger Alarm?</h1>
+
+        <div id="TriggerAlarmView" class="flex-section">
+            <div class="image-caption-col">
+                <img src="Img/tnb read/TriggerAlarm.png" alt="NEM meter view">
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="container_tech" id="EnergyClippingView">
+        <h1>What is Energy Clipping?</h1>
+        <p><strong>
+                Energy clipping happens when solar electric (photovoltaic) panels provide more power than an
+                inverter can handle.Clipping is lost power production
+            </strong></p>
+        <!-- First Energy Clipping Section -->
+        <div class="content-wrapper">
+            <div class="image-section">
+                <img src="Img/tnb read/energyClipping.png" alt="Energy clipping diagram 1"
+                    onerror="this.onerror=null;this.src='https://placehold.co/600x400/F4C769/FFFFFF?text=Image+Not+Found';">
+            </div>
+            <div class="text-section">
+                <p>
+                    As you can see, that is a cut-off line in the above diagram. This is due to the inverter reaching
+                    its maximum capacity and being unable to process the excess energy produced by the solar panels.
+                </p>
+            </div>
+        </div>
+
+        <!-- Second Energy Clipping Section -->
+        <div class="content-wrapper">
+            <div class="image-section">
+                <img src="Img/tnb read/energyClipping2.png" alt="Energy clipping diagram 2"
+                    onerror="this.onerror=null;this.src='https://placehold.co/600x400/F4C769/FFFFFF?text=Image+Not+Found';">
+            </div>
+            <div class="text-section">
+                <p>
+                    Similar to the diagram above, the inverter hit its maximum capacity, causing a cut-off line.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <button onclick="scrollToTop()" id="backToTopBtn" title="Back to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7" />
+        </svg>
+    </button>
+
+
+    <script src="js/popup.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/performance.js"></script>
+    <script src="js/backToTop.js"></script>
+</body>
+
+</html>
